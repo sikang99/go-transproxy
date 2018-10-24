@@ -37,7 +37,7 @@ version:
 build:          ## Build the binary
 build: vendor
 	test $(BINARY_NAME)
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ./deb/opt//transproxy$(BINARY_NAME) -ldflags "-X main.Version=$(VERSION)" ./cmd/transproxy/main.go 
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ./deb/opt/transproxy/$(BINARY_NAME) -ldflags "-X main.Version=$(VERSION)" ./cmd/transproxy/main.go 
 
 build-deb:      ## Build DEB package (needs other tools)
 	test $(BINARY_NAME)
