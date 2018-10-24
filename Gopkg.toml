@@ -25,3 +25,7 @@ required = ["github.com/cybozu-go/cmd"]
 [[constraint]]
   branch = "master"
   name = "github.com/comail/colog"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/ThomsonReutersEikon/go-ntlm"
