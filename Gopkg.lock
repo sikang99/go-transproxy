@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:5f48b818f16848d05cf74f4cbdd0cbe9e0dcddb3c459b4c510c6e2c8e1b4dff1"
+  digest = "1:77e3721e5e9e71223aed2a539f41a8098d7070f554faf16b63c933a429df1db3"
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
   pruneopts = ""
-  revision = "ad15b42461921f1fb3529b058c6786c6a45d5162"
-  version = "v1.1.1"
+  revision = "a3f95b5c423586578a4e099b11a46c2479628cac"
+  version = "1.0.2"
 
 [[projects]]
   branch = "master"
@@ -18,12 +18,20 @@
   revision = "fba8e7b1f46c3607f09760ce3880066e7ff57c5a"
 
 [[projects]]
-  digest = "1:24af1177a66a29f021e5a9d4345400097324ea926bc314ee4ec395d9da8fac3a"
+  digest = "1:ba22b0a4d831db70998385e8c83630c89a90eca1084bd186decb7688f1a08fb7"
   name = "github.com/coreos/go-iptables"
   packages = ["iptables"]
   pruneopts = ""
-  revision = "47f22b0dd3355c0ba570ba12b0b8a36bf214c04b"
-  version = "v0.4.0"
+  revision = "259c8e6a4275d497442c721fa52204d7a58bde8b"
+  version = "v0.2.0"
+
+[[projects]]
+  digest = "1:3c3f68ebab415344aef64363d23471e953a4715645115604aaf57923ae904f5e"
+  name = "github.com/coreos/go-semver"
+  packages = ["semver"]
+  pruneopts = ""
+  revision = "8ab6407b697782a06568d4b7f1db25550ec2e4c6"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:0cc4a876d2370424482922f10afa505e3bda0e41918c1cb9691e6ceb1e12f494"
@@ -34,20 +42,20 @@
   version = "v1.5.0"
 
 [[projects]]
-  digest = "1:bf74dce638e2abab7343ec9efcaa20d9e39886309a5f2e45626e14e90a30ff9f"
+  digest = "1:792bb40063871a5a8782a5b695168e7d789e46aae85e60094b93132e041c4df9"
   name = "github.com/cybozu-go/log"
   packages = ["."]
   pruneopts = ""
-  revision = "6ee9c9318bd6e46bd69a53c76f8d6808584369b6"
-  version = "v1.5.0"
+  revision = "255a1a56ed921cf489010e04766b30070a9bb59b"
+  version = "v1.4.1"
 
 [[projects]]
-  digest = "1:734352a5b4e89a549c7bf1b814acef9fd93794482a50558cf5470b22637dc53d"
+  digest = "1:23d6c9cb31162e8a2ee4813560b0dd8d0bb93eb95b7ebd0ca47629bd2ef555d3"
   name = "github.com/cybozu-go/netutil"
   packages = ["."]
   pruneopts = ""
-  revision = "406fc97537a697489c7f5bd78fb074331bb8bed6"
-  version = "v1.2.0"
+  revision = "2fcba33d781f20505e4cb66037954b7e8ea01f4f"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:deebdf2a42972bdd836a80190bb5724da2856e724e211ec4c5dc07b67c2680f8"
@@ -58,20 +66,20 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:2bb7c3f28dc56124857cc07745c293cb15c1eff3417aaef3356a4e614fa728bc"
+  branch = "master"
+  digest = "1:7ce300e943482aff885b3318c1c6a609827f43e3ba26a073380d5ba6143a0c48"
   name = "github.com/elazarl/goproxy"
   packages = ["."]
   pruneopts = ""
-  revision = "947c36da3153ff334e74d9d980de341d25f358ba"
-  version = "v1.1"
+  revision = "aacba83f36a55ac31cbb71c06547a328c0cd1604"
 
 [[projects]]
-  digest = "1:02e329eb586c21b3bf644a52b9e16e5c36b4ca874f39c145b59c01a694c7ed93"
+  digest = "1:bf22bc55aceab0e3d6014600af13201f87fe1bba0e49aabfe4ccce8f329ae1e7"
   name = "github.com/fardog/secureoperator"
   packages = ["."]
   pruneopts = ""
-  revision = "8fc1309980aa6622ff53734b21363721e8e65a88"
-  version = "v4.0.1"
+  revision = "8dfe895db8ee70568ec900451d0a3b2ce9ec9866"
+  version = "v2.1.0"
 
 [[projects]]
   digest = "1:eb53021a8aa3f599d29c7102e65026242bdedce998a54837dc67f14b6a97c5fd"
@@ -107,6 +115,14 @@
   packages = ["."]
   pruneopts = ""
   revision = "06d84117953b22058c096b49a429ebd4f3d3d97b"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ad51a0eb604be0b09b7549bab3c48d038141a56825a37fa44171f674ca47c3e8"
+  name = "github.com/janeczku/go-ipset"
+  packages = ["ipset"]
+  pruneopts = ""
+  revision = "499ed3217c4b5a39b31c483b0151aea724adb933"
 
 [[projects]]
   digest = "1:6a874e3ddfb9db2b42bd8c85b6875407c702fa868eed20634ff489bc896ccfd3"
@@ -275,6 +291,7 @@
     "github.com/elazarl/goproxy",
     "github.com/fardog/secureoperator",
     "github.com/inconshreveable/go-vhost",
+    "github.com/janeczku/go-ipset/ipset",
     "github.com/miekg/dns",
     "github.com/spf13/pflag",
     "github.com/spf13/viper",

@@ -7,12 +7,14 @@ import (
 	"strings"
 
 	"github.com/coreos/go-iptables/iptables"
+	"github.com/janeczku/go-ipset/ipset"
 )
 
 const (
-	NAT        = "nat"
-	PREROUTING = "PREROUTING"
-	OUTPUT     = "OUTPUT"
+	NAT         = "nat"
+	PREROUTING  = "PREROUTING"
+	OUTPUT      = "OUTPUT"
+	NOPROXYLIST = "NOPROXYLIST"
 )
 
 type IPTables struct {
@@ -26,6 +28,7 @@ type IPTables struct {
 	standaloneHTTPRule  []string
 	standaloneHTTPSRule []string
 	err                 error
+	npNetworks          *ipset.IPSet
 }
 
 type IPTablesConfig struct {
@@ -39,6 +42,7 @@ type IPTablesConfig struct {
 	ExecuteStandalone          bool
 	DisableTCPProxy            bool
 	ParameterHTTPHTTPSIptables string
+	NoProxy                    NoProxy
 }
 
 func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
@@ -64,8 +68,30 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 
 	phhi := strings.Split(c.ParameterHTTPHTTPSIptables, " ")
 
+	var npNetworks *ipset.IPSet
+	if c.ExecuteStandalone {
+		n, err := ipset.New(NOPROXYLIST, "hash:net", &ipset.Params{})
+		if err != nil {
+			return nil, err
+		} else {
+			for _, value := range c.NoProxy.IPs {
+				n.Add(value, 0)
+			}
+			for _, value := range c.NoProxy.CIDRs {
+				n.Add(value.String(), 0)
+			}
+		}
+		npNetworks = n
+	}
+
 	var dnsTCPRule []string
 	var dnsUDPRule []string
+	var httpRule []string
+	var httpsRule []string
+	var tcpRule []string
+	var standaloneHTTPRule []string
+	var standaloneHTTPSRule []string
+	// for DNS
 	if c.PreferLocalDNSReolver {
 		dnsTCPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
 		dnsUDPRule = []string{NAT, OUTPUT, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
@@ -73,31 +99,40 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 		dnsTCPRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
 		dnsUDPRule = []string{NAT, PREROUTING, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
 	}
-	var httpRule []string
-	var httpsRule []string
-	if c.ParameterHTTPHTTPSIptables != "" {
-		httpRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "80"}
-		for _, value := range phhi {
-			httpRule = append(httpRule, value)
-		}
-		httpRule = append(httpRule, []string{"-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPToPort)}...)
-
-		httpsRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "443"}
-		for _, value := range phhi {
-			httpsRule = append(httpsRule, value)
-		}
-		httpsRule = append(httpsRule, []string{"-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPSToPort)}...)
-	} else {
-		httpRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPToPort)}
-		httpsRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPSToPort)}
-	}
-	var standaloneHTTPRule []string
-	var standaloneHTTPSRule []string
+	// for HTTP/HTTPS ///////////////////////////////////////////
+	// for Standalone HTTP
 	if c.ExecuteStandalone {
-		standaloneHTTPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPToPort)}
-		standaloneHTTPSRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPSToPort)}
+		httpRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "80", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst"}
+	} else {
+		httpRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "80"}
 	}
-	var tcpRule []string
+	for _, value := range phhi {
+		if value == "" {
+			continue
+		}
+		httpRule = append(httpRule, value)
+	}
+	httpRule = append(httpRule, []string{"-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPToPort)}...)
+	// for Standalone HTTPS
+	if c.ExecuteStandalone {
+		httpsRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "443", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst"}
+	} else {
+		httpsRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "443"}
+	}
+	for _, value := range phhi {
+		if value == "" {
+			continue
+		}
+		httpsRule = append(httpsRule, value)
+	}
+	httpsRule = append(httpsRule, []string{"-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPSToPort)}...)
+	// for Standalone HTTP/HTTPS
+	if c.ExecuteStandalone {
+		standaloneHTTPRule = []string{NAT, OUTPUT, "-p", "tcp", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst", "--dport", "80", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPToPort)}
+		standaloneHTTPSRule = []string{NAT, OUTPUT, "-p", "tcp", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst", "--dport", "443", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.HTTPSToPort)}
+	}
+	///////////////////////////////////////////////
+	// TCPIP
 	if !c.DisableTCPProxy {
 		tcpRule = []string{NAT, PREROUTING, "-p", "tcp", "-m", "multiport", "--dport", strings.Join(tcpDPorts, ","), "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.TCPToPort)}
 	}
@@ -112,6 +147,7 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 		tcpRule:             tcpRule,
 		standaloneHTTPRule:  standaloneHTTPRule,
 		standaloneHTTPSRule: standaloneHTTPSRule,
+		npNetworks:          npNetworks,
 	}, nil
 }
 
@@ -146,6 +182,10 @@ func (t *IPTables) Stop() error {
 	t.deleteRule(t.tcpRule)
 	t.deleteRule(t.standaloneHTTPRule)
 	t.deleteRule(t.standaloneHTTPSRule)
+
+	if t.npNetworks.Name != "" {
+		t.npNetworks.Destroy()
+	}
 
 	return t.err
 }

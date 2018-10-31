@@ -183,6 +183,9 @@ func startAllProxy(level colog.Level) {
 	if noProxy == "" {
 		noProxy = os.Getenv("NO_PROXY")
 	}
+	if noProxy == "" {
+		noProxy = "127.0.0.1"
+	}
 
 	np := parseNoProxy(noProxy)
 	// start servers
@@ -262,6 +265,7 @@ func startAllProxy(level colog.Level) {
 			ExecuteStandalone:          executeStandalone,
 			DisableTCPProxy:            disableTCPProxy,
 			ParameterHTTPHTTPSIptables: parameterHTTPHTTPSIptables,
+			NoProxy:                    np,
 		})
 		if err != nil {
 			log.Printf("alert: %s", err.Error())

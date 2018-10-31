@@ -1,0 +1,14 @@
+# vim: syntax=Dockerfile
+
+FROM golang:1.10
+RUN go get -u github.com/golang/dep/cmd/dep
+ENV PACKAGE_PATH $GOPATH/src/go-transproxy/go-transproxy
+RUN mkdir -p  $PACKAGE_PATH
+COPY . $PACKAGE_PATH
+WORKDIR $PACKAGE_PATH
+ARG version_string
+ARG binary_name
+ARG goos
+ARG goarch
+RUN dep ensure &&  GOOS=${goos} GOARCH=${goarch} go build -o $GOPATH/bin/${binary_name} -ldflags "-X main.Version=${version_string}" $PACKAGE_PATH/cmd/transproxy/main.go && cp $GOPATH/bin/${binary_name} /${binary_name}
+ENTRYPOINT "/${binary_name}"
