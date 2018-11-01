@@ -197,14 +197,24 @@ func (t *IPTables) Stop() error {
 
 func (t *IPTables) Show() string {
 	s := fmt.Sprintf(`iptables -t %s -I %s
-iptables -t %s -I %s
-iptables -t %s -I %s
 iptables -t %s -I %s`,
 		t.httpsRule[0], strings.Join(t.httpsRule[1:], " "),
 		t.httpRule[0], strings.Join(t.httpRule[1:], " "),
-		t.dnsUDPRule[0], strings.Join(t.dnsUDPRule[1:], " "),
-		t.dnsTCPRule[0], strings.Join(t.dnsTCPRule[1:], " "),
 	)
+
+	if len(t.dnsUDPRule) > 0 {
+		s += fmt.Sprintf(`
+iptables -t %s -I %s`,
+			t.dnsUDPRule[0], strings.Join(t.dnsUDPRule[1:], " "),
+		)
+	}
+
+	if len(t.dnsTCPRule) > 0 {
+		s += fmt.Sprintf(`
+iptables -t %s -I %s`,
+			t.dnsTCPRule[0], strings.Join(t.dnsTCPRule[1:], " "),
+		)
+	}
 
 	if len(t.tcpRule) > 0 {
 		s += fmt.Sprintf(`
