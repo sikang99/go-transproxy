@@ -41,6 +41,7 @@ type IPTablesConfig struct {
 	PreferLocalDNSReolver      bool
 	ExecuteStandalone          bool
 	DisableTCPProxy            bool
+	DisableDNSProxy            bool
 	ParameterHTTPHTTPSIptables string
 	NoProxy                    NoProxy
 }
@@ -57,13 +58,15 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 	}
 
 	var dnsTCPOutRule []string
-	if c.PublicDNS != "" {
-		h, p, err := net.SplitHostPort(c.PublicDNS)
-		if err != nil {
-			c.PublicDNS = net.JoinHostPort(c.PublicDNS, "53")
+	if !c.DisableDNSProxy {
+		if c.PublicDNS != "" {
+			h, p, err := net.SplitHostPort(c.PublicDNS)
+			if err != nil {
+				c.PublicDNS = net.JoinHostPort(c.PublicDNS, "53")
+			}
+			h, p, _ = net.SplitHostPort(c.PublicDNS)
+			dnsTCPOutRule = []string{NAT, OUTPUT, "-p", "tcp", "-d", h, "--dport", p, "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.TCPToPort)}
 		}
-		h, p, _ = net.SplitHostPort(c.PublicDNS)
-		dnsTCPOutRule = []string{NAT, OUTPUT, "-p", "tcp", "-d", h, "--dport", p, "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.TCPToPort)}
 	}
 
 	phhi := strings.Split(c.ParameterHTTPHTTPSIptables, " ")
@@ -92,12 +95,14 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 	var standaloneHTTPRule []string
 	var standaloneHTTPSRule []string
 	// for DNS
-	if c.PreferLocalDNSReolver {
-		dnsTCPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
-		dnsUDPRule = []string{NAT, OUTPUT, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
-	} else {
-		dnsTCPRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
-		dnsUDPRule = []string{NAT, PREROUTING, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+	if !c.DisableDNSProxy {
+		if c.PreferLocalDNSReolver {
+			dnsTCPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+			dnsUDPRule = []string{NAT, OUTPUT, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+		} else {
+			dnsTCPRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+			dnsUDPRule = []string{NAT, PREROUTING, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+		}
 	}
 	// for HTTP/HTTPS ///////////////////////////////////////////
 	// for Standalone HTTP
