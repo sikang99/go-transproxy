@@ -43,8 +43,6 @@ build-deb:      ## Build DEB package (needs other tools)
 	test $(BINARY_NAME)
 	test $(DEB_PACKAGE_NAME)
 	test "$(DEB_PACKAGE_DESCRIPTION)"
-	test $(GOOS)
-	test $(GOARCH)
 	exec ${BUILD_SCRIPT}
 
 test: vendor

@@ -1,0 +1,34 @@
+# vim: syntax=Dockerfile
+
+FROM ruby:2.3
+RUN  gem install --quiet --no-document fpm
+
+ARG binary_name
+ARG deb_package_name
+ARG version_string
+ARG deb_package_description
+ARG deb_arch
+
+RUN mkdir /deb-package
+COPY . /deb-package
+RUN mkdir dpkg-source
+WORKDIR dpkg-source
+RUN fpm --output-type deb \
+  --input-type dir --chdir /deb-package \
+  --config-files /etc/transproxy/transproxy.conf --name $binary_name \
+  --version $version_string \
+  --description "${deb_package_description}" \
+  --package ${deb_package_name}_${version_string}_${deb_arch}.deb \
+  --license MIT \
+  --maintainer 'INTEC ATI <info-ati@intec.co.jp>' \
+  --architecture ${deb_arch} \
+  --vendor 'INTEC ATI' \
+  --url 'https://github.com/rdbox-intec' \
+  --depends 'ipset' \
+  ./deb/opt/transproxy/$binary_name=/opt/transproxy/$binary_name \ 
+  ./deb/opt/transproxy/kicker=/opt/transproxy/kicker \ 
+  ./deb/etc/logrotate.d/transproxy=/etc/logrotate.d/transproxy \
+  ./deb/etc/transproxy/transproxy.conf=/etc/transproxy/transproxy.conf \
+  ./deb/lib/systemd/system/transproxy.service=/lib/systemd/system/transproxy.service \
+  && cp *.deb /deb-package/
+CMD ["/bin/bash"]

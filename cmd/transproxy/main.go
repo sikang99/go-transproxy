@@ -96,6 +96,7 @@ var (
 	preferLocalDNSReolver      = *flag.Bool("prefer-local-dns-reolver", false, "If true, use the local DNS resolver preferentially. If unknown, go-transproxy will process it. (local DNS resolver, dnsmasq, systemd-resolved.....)")
 	executeStandalone          = *flag.Bool("execute-standalone", false, "Set to true to execute a transparent proxy on each computer.")
 	disableTCPProxy            = *flag.Bool("disable-tcpproxy", false, "Disable tcp's transproxy.")
+	disableDNSProxy            = *flag.Bool("disable-dnsproxy", false, "Disable DNS's transproxy.")
 	parameterHTTPHTTPSIptables = *flag.String(
 		"parameter-http-https-iptables", "", "Specify additional parameters.(etc. '-i eth0')",
 	)
@@ -123,6 +124,7 @@ func settings() {
 	preferLocalDNSReolver = viper.GetBool("prefer-local-dns-reolver")
 	executeStandalone = viper.GetBool("execute-standalone")
 	disableTCPProxy = viper.GetBool("disable-tcpproxy")
+	disableDNSProxy = viper.GetBool("disable-dnsproxy")
 	parameterHTTPHTTPSIptables = viper.GetString("parameter-http-https-iptables")
 	ntlmEnabled = viper.GetBool("ntlm-enabled")
 }
@@ -183,33 +185,44 @@ func startAllProxy(level colog.Level) {
 	if noProxy == "" {
 		noProxy = os.Getenv("NO_PROXY")
 	}
-
-	np := parseNoProxy(noProxy)
-	// start servers
-	tcpProxy := transproxy.NewTCPProxy(
-		transproxy.TCPProxyConfig{
-			ListenAddress: tcpProxyListenAddress,
-			NoProxy:       np,
-		},
-	)
-	if err := tcpProxy.Start(); err != nil {
-		log.Fatalf("alert: %s", err.Error())
+	if noProxy == "" {
+		noProxy = "127.0.0.1"
 	}
 
-	dnsProxy := transproxy.NewDNSProxy(
-		transproxy.DNSProxyConfig{
-			Enabled:             useDNSProxy(),
-			ListenAddress:       dnsProxyListenAddress,
-			EnableUDP:           dnsEnableUDP,
-			EnableTCP:           dnsEnableTCP,
-			Endpoint:            dnsOverHTTPSEndpoint,
-			PublicDNS:           publicDNS,
-			PrivateDNS:          privateDNS,
-			DNSOverHTTPSEnabled: dnsOverHTTPSEnabled,
-			NoProxyDomains:      np.Domains,
-		},
-	)
-	dnsProxy.Start()
+	np := parseNoProxy(noProxy)
+
+	// start servers
+	if !disableTCPProxy {
+		tcpProxy := transproxy.NewTCPProxy(
+			transproxy.TCPProxyConfig{
+				ListenAddress: tcpProxyListenAddress,
+				NoProxy:       np,
+			},
+		)
+		if err := tcpProxy.Start(); err != nil {
+			log.Fatalf("alert: %s", err.Error())
+		}
+	}
+
+	var dnsProxy *transproxy.DNSProxy
+	if !disableDNSProxy {
+		dnsProxy = transproxy.NewDNSProxy(
+			transproxy.DNSProxyConfig{
+				Enabled:             useDNSProxy(),
+				ListenAddress:       dnsProxyListenAddress,
+				EnableUDP:           dnsEnableUDP,
+				EnableTCP:           dnsEnableTCP,
+				Endpoint:            dnsOverHTTPSEndpoint,
+				PublicDNS:           publicDNS,
+				PrivateDNS:          privateDNS,
+				DNSOverHTTPSEnabled: dnsOverHTTPSEnabled,
+				NoProxyDomains:      np.Domains,
+			},
+		)
+		dnsProxy.Start()
+	} else {
+		dnsProxy = nil
+	}
 
 	httpProxy := transproxy.NewHTTPProxy(
 		transproxy.HTTPProxyConfig{
@@ -261,7 +274,9 @@ func startAllProxy(level colog.Level) {
 			PreferLocalDNSReolver:      preferLocalDNSReolver,
 			ExecuteStandalone:          executeStandalone,
 			DisableTCPProxy:            disableTCPProxy,
+			DisableDNSProxy:            disableDNSProxy,
 			ParameterHTTPHTTPSIptables: parameterHTTPHTTPSIptables,
+			NoProxy:                    np,
 		})
 		if err != nil {
 			log.Printf("alert: %s", err.Error())

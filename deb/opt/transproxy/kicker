@@ -42,7 +42,7 @@ start () {
 	umask 027
 	ulimit -n 65535
 	cd $run_dir
-	$DAEMON --conf $CONFIG > $LOG 2>&1 &
+	$DAEMON --conf $CONFIG >> $LOG 2>&1 &
         PID=$!
 	echo $PID > $PIDFILE
 	return $PID
@@ -77,9 +77,9 @@ stop () {
 case "$1" in
     start)
 	if start ; then
-		echo "OK!"
-	else
 		echo "NG!"
+	else
+		echo "OK!"
 	fi
 	;;
     stop)
