@@ -1,0 +1,9 @@
+/var/log/transproxy/transproxy.log {
+    ifempty
+    dateformat .%Y%m%d
+    missingok
+    daily
+    copytruncate
+    dateext
+    rotate 30
+}

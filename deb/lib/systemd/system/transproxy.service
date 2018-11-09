@@ -1,0 +1,19 @@
+[Unit]
+Description=Transproxy BOOTUP SERVICE
+ConditionFileIsExecutable=/opt/transproxy/kicker
+ConditionFileIsExecutable=/opt/transproxy/transproxy
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /opt/transproxy/kicker start
+ExecStop=/bin/bash /opt/transproxy/kicker stop
+Type=forking
+TimeoutSec=0
+RemainAfterExit=yes
+SysVStartPriority=99
+PIDFile=/var/run/transproxy.pid
+EnvironmentFile=/etc/transproxy/http_proxy
+EnvironmentFile=/etc/transproxy/no_proxy
+
+[Install]
+WantedBy=multi-user.target

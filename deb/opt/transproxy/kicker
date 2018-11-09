@@ -1,0 +1,98 @@
+#! /bin/bash
+
+NAME=transproxy
+DESC="Transparent HTTP Proxy"
+DAEMON=/opt/$NAME/$NAME
+PIDFILE=/var/run/$NAME.pid
+CONFIG=/etc/$NAME/$NAME.conf
+LOG=/var/log/$NAME/$NAME.log
+
+create_run_dir () {
+	run_dir=/var/run/transproxy
+	usr=root
+	grp=root
+
+	if [ "$(dpkg-statoverride --list $run_dir)" = "" ] &&
+	   [ ! -e $run_dir ] ; then
+		mkdir -p $run_dir
+	  	chown $usr:$grp $run_dir
+		[ -x /sbin/restorecon ] && restorecon $run_dir
+	fi
+}
+
+create_log_dir () {
+	log_dir=/var/log/transproxy
+	usr=root
+	grp=root
+
+	if [ "$(dpkg-statoverride --list $log_dir)" = "" ] &&
+	   [ ! -e $log_dir ] ; then
+		mkdir -p $log_dir
+	  	chown $usr:$grp $log_dir
+		[ -x /sbin/restorecon ] && restorecon $log_dir
+	fi
+}
+
+start () {
+	run_dir=/var/run/transproxy
+
+	create_run_dir
+	create_log_dir
+
+	umask 027
+	ulimit -n 65535
+	cd $run_dir
+	$DAEMON --conf $CONFIG >> $LOG 2>&1 &
+        PID=$!
+	echo $PID > $PIDFILE
+	return $PID
+}
+
+stop () {
+	PID=`cat $PIDFILE 2>/dev/null`
+	kill -SIGINT $PID
+	#
+	#	Now we have to wait until transproxy has _really_ stopped.
+	#
+	sleep 5
+	if test -n "$PID" && kill -0 $PID 2>/dev/null
+	then
+		cnt=0
+		while kill -0 $PID 2>/dev/null
+		do
+			cnt=`expr $cnt + 1`
+			if [ $cnt -gt 24 ]
+			then
+				return 1
+			fi
+			sleep 5
+		done
+		return 0
+	else
+		return 0
+	fi
+}
+
+
+case "$1" in
+    start)
+	if start ; then
+		echo "NG!"
+	else
+		echo "OK!"
+	fi
+	;;
+    stop)
+	if stop ; then
+		echo "OK!"
+	else
+		echo "NG!"
+	fi
+	;;
+    *)
+	echo "Usage: ./$NAME {start|stop}"
+	exit 3
+	;;
+esac
+
+exit 0

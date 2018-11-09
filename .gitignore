@@ -1,2 +1,4 @@
 bin
 vendor
+deb/opt/transproxy/transproxy
+artifacts
