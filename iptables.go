@@ -97,8 +97,8 @@ func NewIPTables(c *IPTablesConfig) (*IPTables, error) {
 	// for DNS
 	if !c.DisableDNSProxy {
 		if c.PreferLocalDNSReolver {
-			dnsTCPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
-			dnsUDPRule = []string{NAT, OUTPUT, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+			dnsTCPRule = []string{NAT, OUTPUT, "-p", "tcp", "--dport", "53", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
+			dnsUDPRule = []string{NAT, OUTPUT, "-p", "udp", "--dport", "53", "-m", "set", "!", "--match-set", NOPROXYLIST, "dst", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
 		} else {
 			dnsTCPRule = []string{NAT, PREROUTING, "-p", "tcp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}
 			dnsUDPRule = []string{NAT, PREROUTING, "-p", "udp", "--dport", "53", "-j", "REDIRECT", "--to-ports", strconv.Itoa(c.DNSToPort)}

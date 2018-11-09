@@ -35,6 +35,8 @@ if [ $DEB_ARCH  = "arm" ]; then
   DEB_ARCH="armhf"
 fi
 
+rm -rf ./$BUILD_ARTIFACTS_DIR
+
 docker build --build-arg \
     version_string=$VERSION_STRING \
     --build-arg \
