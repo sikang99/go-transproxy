@@ -22,8 +22,7 @@ BUILD_IMAGE=$DOCKER_ACCOUNT/golang-binary-builder
 FPM_IMAGE=$DOCKER_ACCOUNT/golang-deb-builder
 BUILD_ARTIFACTS_DIR="artifacts"
 
-version=`git rev-parse --short HEAD`
-VERSION_STRING="$(cat VERSION)-${version}"
+VERSION_STRING=$(cat VERSION)
 
 
 # check all the required environment variables are supplied
