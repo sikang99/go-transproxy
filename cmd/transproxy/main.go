@@ -386,6 +386,9 @@ func parseNoProxy(noProxy string) transproxy.NoProxy {
 	var domainArray []string
 
 	for _, v := range p {
+		if v == '' {
+			continue
+		}
 		ip := net.ParseIP(v)
 		if ip != nil {
 			ipArray = append(ipArray, v)

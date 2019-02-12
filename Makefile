@@ -1,7 +1,7 @@
 GOPATH := $(shell go env GOPATH)
 GODEP_BIN := $(GOPATH)/bin/dep
 GOLINT := $(GOPATH)/bin/golint
-VERSION := $(shell cat VERSION)-$(shell git rev-parse --short HEAD)
+VERSION := $(shell cat VERSION)
 GOOS ?= $(shell go env GOOS)
 GOARCH ?= $(shell go env GOARCH)
 
