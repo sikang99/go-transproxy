@@ -20,9 +20,9 @@ RUN fpm --output-type deb \
   --description "${deb_package_description}" \
   --package ${deb_package_name}_${version_string}_${deb_arch}.deb \
   --license MIT \
-  --maintainer 'INTEC ATI <info-ati@intec.co.jp>' \
+  --maintainer 'INTEC Inc. <info-rdbox@intec.co.jp>' \
   --architecture ${deb_arch} \
-  --vendor 'INTEC ATI' \
+  --vendor 'INTEC Inc.' \
   --url 'https://github.com/rdbox-intec' \
   --depends 'ipset' \
   ./deb/opt/transproxy/$binary_name=/opt/transproxy/$binary_name \ 
