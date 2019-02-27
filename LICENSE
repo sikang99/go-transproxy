@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2017 INTEC Inc.
+Copyright (c) 2019 INTEC Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-The major design pattern of this plugin was abstracted from Hiroyuki Wada's go-transproxy, which is subject to the same license.
+The major design pattern of this software was abstracted from Hiroyuki Wada's go-transproxy, which is subject to the same license.
 Here is the original copyright notice for go-transproxy:
 
 Copyright (c) 2017 Hiroyuki Wada
