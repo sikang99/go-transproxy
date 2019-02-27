@@ -6,7 +6,7 @@ The major design pattern of this software was abstracted from wadahiro's go-tran
 Transparent proxy servers for HTTP, HTTPS, DNS and TCP. 
 This repository is heavily under development.
 
-<img src="https://github.com/rdbox-intec/go-transproxy/tree/master/images/kougakumeisai.png" width="200px">
+<img src="https://github.com/fukuta-tatsuya-intec/go-transproxy/blob/master/images/kougakumeisai.png" width="200px">
 
 ## Description
 
@@ -41,19 +41,19 @@ sudo apt-get install transproxy
 
 1. In order to activate transproxyService, create two new files, http_proxy and no_proxy.
 
-### /etc/transproxy/http_proxy
+- /etc/transproxy/http_proxy
 Create new one. and set your proxy environment.
 ```
 http_proxy=http://user:pass@yourproxy.example.org:8080
 ```
 
-### /etc/transproxy/no_proxy
+- /etc/transproxy/no_proxy
 Create new one. make sure to configure the 127.0.0.1
 ```
 no_proxy=127.0.0.1,192.168.0.0/24
 ```
 
-### /etc/transproxy/transproxy.conf
+- /etc/transproxy/transproxy.conf
 
 ```
 ## Log level, one of: debug, info, warn, error, fatal, panic
