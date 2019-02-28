@@ -33,8 +33,8 @@ One is a simple proxy delegating to upstream your proxy, another is for adding `
 ## Getting Started.
 1. Install
 ```
-wget -qO - "https://bintray.com/user/downloadSubjectPublicKey?username=robotics-rdbox" | sudo apt-key add - 
-echo "deb https://dl.bintray.com/robotics-rdbox/deb master main" | sudo tee -a /etc/apt/sources.list.d/rdbox.list
+wget -qO - "https://bintray.com/user/downloadSubjectPublicKey?username=rdbox" | sudo apt-key add - 
+echo "deb https://dl.bintray.com/rdbox/deb stretch main" | sudo tee -a /etc/apt/sources.list.d/rdbox.list
 sudo apt-get update
 sudo apt-get install transproxy
 ```
