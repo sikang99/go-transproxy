@@ -6,7 +6,7 @@ The major design pattern of this software was abstracted from wadahiro's go-tran
 Transparent proxy servers for HTTP, HTTPS, DNS and TCP. 
 This repository is heavily under development.
 
-<img src="https://github.com/fukuta-tatsuya-intec/go-transproxy/blob/master/images/kougakumeisai.png" width="200px">
+<img src="https://github.com/rdbox-intec/go-transproxy/blob/master/images/kougakumeisai.png" width="200px">
 
 ## Description
 
