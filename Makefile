@@ -4,7 +4,7 @@
 ORG=cojam
 NAME=go-transproxy
 DIST=alpine-3.13
-BUILD=0.0.0.1
+BUILD=0.0.2.1
 BASE=$(ORG)/$(NAME)-$(DIST)
 IMAGE=$(BASE):$(BUILD)
 #-----------------------------------------------------------------------
