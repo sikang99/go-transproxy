@@ -10,29 +10,12 @@ IMAGE=$(BASE):$(BUILD)
 #-----------------------------------------------------------------------
 usage:
 	@echo "usage: make [local-play|docker|git]"
-
+#-----------------------------------------------------------------------
 build b:
 	go build -o $(NAME) cmd/transproxy/main.go
 
 run r:
 	./$(NAME)
-#-----------------------------------------------------------------------
-STREAM=zazero
-local-play lp:
-	@echo "> make (local-play) [rtmp|hflv|wflv|hls|dash]"
-
-local-play-rtmp lprtmp:
-	ffplay rtmp://localhost/live/$(STREAM)
-local-play-hflv lphflv:
-	ffplay http://localhost:8080/live/$(STREAM).flv
-local-play-wflv lpwflv:
-	ffplay ws://localhost:8080/live/$(STREAM).flv
-local-play-hls lphls:
-	ffplay http://localhost:8080/live/$(STREAM)/index.m3u8
-local-play-dash lpdash:
-	ffplay http://localhost:8080/live/$(STREAM)/index.mpd
-local-admin-http lahttp:
-	open http://localhost:8080/admin
 #-----------------------------------------------------------------------
 docker d:
 	@echo "make (docker) [build|run|kill]"
