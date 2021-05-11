@@ -10,6 +10,12 @@ IMAGE=$(BASE):$(BUILD)
 #-----------------------------------------------------------------------
 usage:
 	@echo "usage: make [local-play|docker|git]"
+
+build b:
+	go build -o $(NAME) cmd/transproxy/main.go
+
+run r:
+	./$(NAME)
 #-----------------------------------------------------------------------
 STREAM=zazero
 local-play lp:
