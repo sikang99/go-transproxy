@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	transproxy "go-transproxy/go-transproxy"
+	transproxy "github.com/sikang99/go-transproxy"
 
 	"github.com/comail/colog"
 	"github.com/spf13/pflag"
@@ -386,9 +386,9 @@ func parseNoProxy(noProxy string) transproxy.NoProxy {
 	var domainArray []string
 
 	for _, v := range p {
-                if v == "" {
-                        continue
-                }
+		if v == "" {
+			continue
+		}
 		ip := net.ParseIP(v)
 		if ip != nil {
 			ipArray = append(ipArray, v)
@@ -410,4 +410,3 @@ func parseNoProxy(noProxy string) transproxy.NoProxy {
 		Domains: domainArray,
 	}
 }
-

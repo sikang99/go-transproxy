@@ -1,66 +1,70 @@
-GOPATH := $(shell go env GOPATH)
-GODEP_BIN := $(GOPATH)/bin/dep
-GOLINT := $(GOPATH)/bin/golint
-VERSION := $(shell cat VERSION)
-GOOS ?= $(shell go env GOOS)
-GOARCH ?= $(shell go env GOARCH)
+#
+# Makefile for rtsp2web
+#
+ORG=cojam
+NAME=go-transproxy
+DIST=alpine-3.13
+BUILD=0.0.0.1
+BASE=$(ORG)/$(NAME)-$(DIST)
+IMAGE=$(BASE):$(BUILD)
+#-----------------------------------------------------------------------
+usage:
+	@echo "usage: make [local-play|docker|git]"
+#-----------------------------------------------------------------------
+STREAM=zazero
+local-play lp:
+	@echo "> make (local-play) [rtmp|hflv|wflv|hls|dash]"
 
-packages = $$(go list ./... | egrep -v '/vendor/')
-files = $$(find . -name '*.go' | egrep -v '/vendor/')
+local-play-rtmp lprtmp:
+	ffplay rtmp://localhost/live/$(STREAM)
+local-play-hflv lphflv:
+	ffplay http://localhost:8080/live/$(STREAM).flv
+local-play-wflv lpwflv:
+	ffplay ws://localhost:8080/live/$(STREAM).flv
+local-play-hls lphls:
+	ffplay http://localhost:8080/live/$(STREAM)/index.m3u8
+local-play-dash lpdash:
+	ffplay http://localhost:8080/live/$(STREAM)/index.mpd
+local-admin-http lahttp:
+	open http://localhost:8080/admin
+#-----------------------------------------------------------------------
+docker d:
+	@echo "make (docker) [build|run|kill]"
 
-ifeq "$(HOST_BUILD)" "yes"
-	# Use host system for building
-	BUILD_SCRIPT =./build-deb-host.sh
-else
-	# Use docker for building
-	BUILD_SCRIPT = ./build-deb-docker.sh
-endif
+docker-build db:
+	docker build -t $(IMAGE) .
 
+docker-run dr:
+	docker run -d \
+		-p 1935:1935 \
+		-p 8080:80 \
+		--name $(NAME) $(IMAGE)
 
-.PHONY: all
-all: lint vet test build 
+docker-kill dk:
+	docker stop $(NAME); docker rm $(NAME)
 
-$(GODEP):
-	go get -u github.com/golang/dep/cmd/dep
+docker-ps dp:
+	docker ps -a
 
-Gopkg.toml: $(GODEP)
-	$(GODEP_BIN) init
+docker-image di:
+	docker images $(BASE)
 
-vendor:         ## Vendor the packages using dep
-vendor: $(GODEP) Gopkg.toml Gopkg.lock
-	@ echo "No vendor dir found. Fetching dependencies now..."
-	GOPATH=$(GOPATH):. $(GODEP_BIN) ensure
+docker-clean dc:
+	docker system prune -f
+	docker images
 
-version:
-	@ echo $(VERSION)
+docker-upload du:
+	docker push $(IMAGE)
+#-----------------------------------------------------------------------
+git g:
+	@echo "> make (git:g) [update|store]"
 
-build:          ## Build the binary
-build: vendor
-	test $(BINARY_NAME)
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ./deb/opt/transproxy/$(BINARY_NAME) -ldflags "-X main.Version=$(VERSION)" ./cmd/transproxy/main.go 
+git-update gu:
+	git add .
+	git commit -a -m "$(BUILD),$(USER)"
+	git push
 
-build-deb:      ## Build DEB package (needs other tools)
-	test $(BINARY_NAME)
-	test $(DEB_PACKAGE_NAME)
-	test "$(DEB_PACKAGE_DESCRIPTION)"
-	exec ${BUILD_SCRIPT}
+git-store gs:
+	git config credential.helper store
+#-----------------------------------------------------------------------
 
-test: vendor
-	go test -race $(packages)
-
-vet:            ## Run go vet
-vet: vendor
-	go tool vet -printfuncs=Debug,Debugf,Debugln,Info,Infof,Infoln,Error,Errorf,Errorln $(files)
-
-lint:           ## Run go lint
-lint: vendor $(GOLINT)
-	$(GOLINT) -set_exit_status $(packages)
-$(GOLINT):
-	go get -u github.com/golang/lint/golint
-
-clean:
-	test $(BINARY_NAME)
-	rm -f $(BINARY_NAME) 
-
-help:           ## Show this help
-	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
